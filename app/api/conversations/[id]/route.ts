@@ -26,3 +26,38 @@ export async function GET(
 
   return NextResponse.json(messages);
 }
+
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Verify ownership before deleting
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      id,
+      userId: session.user.id,
+    },
+  });
+
+  if (!conversation) {
+    return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+  }
+
+  // Delete messages first, then the conversation
+  await prisma.message.deleteMany({
+    where: { conversationId: id },
+  });
+
+  await prisma.conversation.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ success: true });
+}
