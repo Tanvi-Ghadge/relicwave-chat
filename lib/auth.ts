@@ -17,4 +17,13 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "database",
   },
+
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id; // 🔑 THIS IS THE KEY LINE
+      }
+      return session;
+    },
+  },
 };
