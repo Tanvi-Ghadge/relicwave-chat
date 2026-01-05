@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 
         controller.close();
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
+        const errorMsg = error instanceof Error ? "Kindly ask factual questions only." : "Unknown error";
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`)
         );
